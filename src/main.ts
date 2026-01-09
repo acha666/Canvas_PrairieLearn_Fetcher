@@ -1,4 +1,4 @@
-import styles from "./ui/styles.css?inline";
+import styles from "./assets/styles.css?inline";
 import { gmAddStyle } from "./platform/gm";
 import {
   clearAssessmentInstanceCache,
