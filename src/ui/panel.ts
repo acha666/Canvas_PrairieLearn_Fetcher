@@ -94,24 +94,7 @@ export class Panel {
     target.appendChild(this.root);
   }
 
-  render(state: PanelRenderState): void {
-    this.body.innerHTML = "";
-    const { identity, parsers, baseConfigErrors } = state;
-
-    const rowFile = h("div", { className: "plcg-row" }, [
-      h("div", { className: "plcg-inline" }, [
-        h("span", { className: "plcg-muted" }, [`Output file: ${state.outputFileName}`]),
-        h("button", { className: "plcg-btn", on: { click: () => this.opts.onChooseFile() } }, ["Choose file"]),
-      ]),
-      h("div", { className: "plcg-muted", style: { marginTop: "6px" } }, [state.lastWriteStatus]),
-    ]);
-
-    const kv = h("div", { className: "plcg-kv plcg-row" });
-    const putKV = (k: string, v: string, className = "") => {
-      kv.appendChild(h("div", { className: "plcg-k" }, [k]));
-      kv.appendChild(h("div", { className: `plcg-v ${className}`.trim() }, [v]));
-    };
-
+  private renderIdentityInfo(identity: IdentityState, putKV: (k: string, v: string, className?: string) => void): void {
     putKV("Name", identity.uiName || "(unavailable)");
 
     if (identity.ok && identity.rec) {
@@ -131,6 +114,27 @@ export class Panel {
         putKV("Canvas student_id", identity.currentStudentId || "", "plcg-muted");
       }
     }
+  }
+
+  render(state: PanelRenderState): void {
+    this.body.innerHTML = "";
+    const { identity, parsers, baseConfigErrors } = state;
+
+    const rowFile = h("div", { className: "plcg-row" }, [
+      h("div", { className: "plcg-inline" }, [
+        h("span", { className: "plcg-muted" }, [`Output file: ${state.outputFileName}`]),
+        h("button", { className: "plcg-btn", on: { click: () => this.opts.onChooseFile() } }, ["Choose file"]),
+      ]),
+      h("div", { className: "plcg-muted", style: { marginTop: "6px" } }, [state.lastWriteStatus]),
+    ]);
+
+    const kv = h("div", { className: "plcg-kv plcg-row" });
+    const putKV = (k: string, v: string, className = "") => {
+      kv.appendChild(h("div", { className: "plcg-k" }, [k]));
+      kv.appendChild(h("div", { className: `plcg-v ${className}`.trim() }, [v]));
+    };
+
+    this.renderIdentityInfo(identity, putKV);
 
     const parsersBlock = h("div", { className: "plcg-row" }, [
       h("div", { className: "plcg-muted", style: { marginBottom: "6px" } }, ["Parsers:"]),
