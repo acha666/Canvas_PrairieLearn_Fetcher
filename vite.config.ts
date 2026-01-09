@@ -1,14 +1,7 @@
 import { defineConfig } from "vite";
 import monkey from "vite-plugin-monkey";
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import pkg from "./package.json";
 import { USERSCRIPT } from "./userscript.meta";
-
-function readPkgVersion(): string {
-  const pkgPath = fileURLToPath(new URL("./package.json", import.meta.url));
-  const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
-  return String(pkg.version || "0.0.0");
-}
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -17,7 +10,7 @@ export default defineConfig({
       entry: "src/main.ts",
       userscript: {
         ...USERSCRIPT,
-        version: readPkgVersion(),
+        version: String(pkg.version ?? "0.0.0"),
       },
     }),
   ],
