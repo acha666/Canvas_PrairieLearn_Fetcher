@@ -61,7 +61,7 @@ export class Panel {
     });
 
     this.headerBar = h("div", { attrs: { id: "plcg-header" } }, [
-      h("div", { attrs: { id: "plcg-title" } }, ["PL Code Fetcher (SpeedGrader)"]),
+      h("div", { attrs: { id: "plcg-title" } }, ["PL Code Fetcher"]),
       h("div", {}, [
         h(
           "button",
