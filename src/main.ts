@@ -1,20 +1,18 @@
 import styles from "./assets/styles.css?inline";
 import { gmAddStyle } from "./platform/gm";
 import {
-  clearAssessmentInstanceCache,
-  loadAssessmentInstanceCache,
   loadConfig,
   loadConfigRaw,
   loadParsers,
   loadStudents,
   loadUiState,
   LS,
-  saveAssessmentInstanceCache,
   saveConfig,
   saveParsers,
   saveStudents,
   saveUiState,
 } from "./core/storage";
+import { AssessmentCacheProvider } from "./core/cacheProvider";
 import type {
   AssessmentInstanceCache,
   Config,
@@ -47,7 +45,7 @@ let lastWriteStatus = "No output file selected";
 let statusText = "";
 let statusKind: PanelRenderState["statusKind"] = "muted";
 
-const aiCacheByAssessmentId = new Map<string, AssessmentInstanceCache>();
+let cacheProvider = new AssessmentCacheProvider(config.courseInstanceId);
 
 function migrateLegacyAssessmentId(): void {
   // Promote legacy root-level assessment_id into each parser config
@@ -71,22 +69,6 @@ function migrateLegacyAssessmentId(): void {
 function setStatus(text: string, kind: PanelRenderState["statusKind"] = "muted"): void {
   statusText = text;
   statusKind = kind;
-}
-
-function getAiCache(assessmentId: string): AssessmentInstanceCache {
-  const aid = String(assessmentId || "").trim();
-  if (!aid) return { map: new Map(), loadedAt: null };
-  if (aiCacheByAssessmentId.has(aid)) return aiCacheByAssessmentId.get(aid)!;
-  const cache = loadAssessmentInstanceCache(config.courseInstanceId, aid);
-  aiCacheByAssessmentId.set(aid, cache);
-  return cache;
-}
-
-function setAiCache(assessmentId: string, cache: AssessmentInstanceCache): void {
-  const aid = String(assessmentId || "").trim();
-  if (!aid) return;
-  aiCacheByAssessmentId.set(aid, cache);
-  saveAssessmentInstanceCache(config.courseInstanceId, aid, cache);
 }
 
 function configReadyErrorsBase(): string[] {
@@ -191,7 +173,7 @@ async function refreshAssessmentInstancesFor(assessmentId: string): Promise<void
       if (uin && ai) map.set(uin, ai);
     });
     const cache: AssessmentInstanceCache = { map, loadedAt: nowIso() };
-    setAiCache(aid, cache);
+    cacheProvider.setCache(aid, cache);
     setStatus(`Loaded ${map.size} instances (assessment_id=${aid}).`, "ok");
   } catch (err) {
     setStatus(`Refresh failed: ${(err as Error)?.message || err}`, "err");
@@ -221,7 +203,7 @@ async function handleFetch(parser: ParserConfig, index: number): Promise<void> {
     return;
   }
 
-  const cache = getAiCache(aid);
+  const cache = cacheProvider.getCache(aid);
   const assessmentInstanceId = cache.map.get(identity.userUin);
   if (!assessmentInstanceId) {
     setStatus(`No instance for user_uin=${identity.userUin} (assessment_id=${aid})`, "err");
@@ -274,7 +256,7 @@ function render(): void {
     identity,
     parsers,
     baseConfigErrors: configReadyErrorsBase(),
-    getCache: (aid: string) => getAiCache(aid),
+    getCache: (aid: string) => cacheProvider.getCache(aid),
     statusText,
     statusKind,
   };
@@ -305,8 +287,8 @@ function handleConfigSaved(snapshot: ConfigModalSnapshot): void {
   saveConfig(config);
   saveParsers(parsers);
   saveStudents(students);
-  clearAssessmentInstanceCache();
-  aiCacheByAssessmentId.clear();
+  cacheProvider.setCourseInstanceId(config.courseInstanceId);
+  cacheProvider.clearAll();
 
   setStatus("Saved", "ok");
   render();
