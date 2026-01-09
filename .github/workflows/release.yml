@@ -7,6 +7,10 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   release-please:
     runs-on: ubuntu-latest
@@ -32,6 +36,12 @@ jobs:
         with:
           node-version: 22
           cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
 
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
