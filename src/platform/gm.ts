@@ -21,9 +21,7 @@ export async function gmRequestJson<T>(opts: {
 }): Promise<T> {
   const { method = "GET", url, headers = {}, timeoutMs = 30_000 } = opts;
   if (typeof GM_xmlhttpRequest !== "function") {
-    const resp = await fetch(url, { method, headers, signal: AbortSignal.timeout(timeoutMs) });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status} ${resp.statusText}: ${await resp.text()}`);
-    return (await resp.json()) as T;
+    throw new Error("GM_xmlhttpRequest is not available");
   }
   return await new Promise<T>((resolve, reject) => {
     GM_xmlhttpRequest({
