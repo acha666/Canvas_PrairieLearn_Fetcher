@@ -1,0 +1,11 @@
+{
+  "name": "pl-canvas-code-fetcher",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+    }
+  },
+  "postCreateCommand": "corepack enable && pnpm -v && pnpm install",
+  "remoteUser": "node"
+}
