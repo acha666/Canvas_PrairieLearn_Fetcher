@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite';
-import monkey from 'vite-plugin-monkey';
+import { defineConfig } from "vite";
+import monkey from "vite-plugin-monkey";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { USERSCRIPT } from "./userscript.meta";
@@ -14,7 +14,7 @@ function readPkgVersion(): string {
 export default defineConfig({
   plugins: [
     monkey({
-      entry: 'src/entry/userscript.ts',
+      entry: "src/main.ts",
       userscript: {
         ...USERSCRIPT,
         version: readPkgVersion(),
