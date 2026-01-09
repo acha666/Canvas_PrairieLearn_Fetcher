@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@types/wicg-file-system-access':
-        specifier: ^2023.10.7
-        version: 2023.10.7
       js-base64:
         specifier: ^3.7.8
         version: 3.7.8
@@ -36,6 +33,9 @@ importers:
       '@types/tampermonkey':
         specifier: ^5.0.5
         version: 5.0.5
+      '@types/wicg-file-system-access':
+        specifier: ^2023.10.7
+        version: 2023.10.7
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.52.0
         version: 8.52.0(@typescript-eslint/parser@8.52.0(eslint@9.39.2)(typescript@5.9.3))(eslint@9.39.2)(typescript@5.9.3)

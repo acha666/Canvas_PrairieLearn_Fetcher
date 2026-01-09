@@ -3,15 +3,14 @@ declare const unsafeWindow: Window | undefined;
 export type OutputFileHandle = FileSystemFileHandle | null;
 
 export async function pickOutputFile(): Promise<OutputFileHandle> {
-  const maybeWindow =
-    typeof unsafeWindow !== "undefined"
-      ? (unsafeWindow as unknown as { showOpenFilePicker?: (...args: unknown[]) => Promise<FileSystemFileHandle[]> })
-      : undefined;
-  const openPicker =
-    maybeWindow?.showOpenFilePicker?.bind(maybeWindow) ??
-    (window as unknown as { showOpenFilePicker?: (...args: unknown[]) => Promise<FileSystemFileHandle[]> }).showOpenFilePicker?.bind(
-      window as unknown as Window
-    );
+  let openPicker: typeof showOpenFilePicker | undefined;
+
+  if (typeof unsafeWindow !== "undefined" && "showOpenFilePicker" in unsafeWindow) {
+    openPicker = (unsafeWindow as Window & { showOpenFilePicker: typeof showOpenFilePicker }).showOpenFilePicker?.bind(unsafeWindow);
+  } else if (typeof showOpenFilePicker !== "undefined") {
+    openPicker = showOpenFilePicker;
+  }
+
   if (!openPicker) {
     return null;
   }
@@ -33,15 +32,10 @@ export async function pickOutputFile(): Promise<OutputFileHandle> {
 }
 
 export async function ensureReadWrite(handle: FileSystemFileHandle): Promise<boolean> {
-  const anyHandle = handle as unknown as {
-    queryPermission?: (opts: { mode: "read" | "readwrite" }) => Promise<PermissionState | "granted" | "denied" | "prompt">;
-    requestPermission?: (opts: { mode: "read" | "readwrite" }) => Promise<PermissionState | "granted" | "denied" | "prompt">;
-  };
-
-  if (!anyHandle.queryPermission || !anyHandle.requestPermission) return true;
-  const status = await anyHandle.queryPermission({ mode: "readwrite" });
+  if (!handle.queryPermission || !handle.requestPermission) return true;
+  const status = await handle.queryPermission({ mode: "readwrite" });
   if (status === "granted") return true;
-  const result = await anyHandle.requestPermission({ mode: "readwrite" });
+  const result = await handle.requestPermission({ mode: "readwrite" });
   return result === "granted";
 }
 

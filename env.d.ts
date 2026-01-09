@@ -3,3 +3,4 @@
 //// <reference types="vite-plugin-monkey/global" />
 /// <reference types="vite-plugin-monkey/style" />
 /// <reference types="@types/tampermonkey" />
+/// <reference types="@types/wicg-file-system-access" />
