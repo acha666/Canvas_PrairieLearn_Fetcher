@@ -11,4 +11,6 @@ export const USERSCRIPT = {
         "GM_xmlhttpRequest",
         "GM_addStyle",
     ],
+    updateURL: "https://github.com/acha666/Canvas_PrairieLearn_Fetcher/releases/latest/download/canvas-prairielearn-fetcher.user.js",
+    downloadURL: "https://github.com/acha666/Canvas_PrairieLearn_Fetcher/releases/latest/download/canvas-prairielearn-fetcher.user.js",
 } satisfies MonkeyUserScript;
