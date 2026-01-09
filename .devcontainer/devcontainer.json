@@ -6,6 +6,6 @@
       "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
     }
   },
-  "postCreateCommand": "corepack enable && pnpm -v && pnpm install",
+  "postCreateCommand": "sudo corepack enable && pnpm -v && pnpm install",
   "remoteUser": "node"
 }
