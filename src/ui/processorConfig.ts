@@ -79,33 +79,23 @@ export function createProcessorEditor(opts: ProcessorEditorOptions): ProcessorEd
 
     renderFields();
 
-    const saveButton = h(
-      "button",
-      {
-        className: "plcg-btn",
-        on: {
-          click: () => {
-            const next = normalizeProcessorConfig({ type: normalized.type, params: normalized.params });
-            const errors = validateProcessorConfig(next);
-            if (errors.length) {
-              alert(`Cannot save processor:\n- ${errors.join("\n- ")}`);
-              return;
-            }
-            opts.onSave(next);
-            close();
-          },
-        },
-      },
-      ["Save"]
-    );
-
-    const cancelButton = h("button", { className: "plcg-btn", on: { click: close } }, ["Cancel"]);
-
-    const headerClose = h("button", { className: "plcg-btn", on: { click: close } }, ["Close"]);
+    const handleSave = () => {
+      const next = normalizeProcessorConfig({ type: normalized.type, params: normalized.params });
+      const errors = validateProcessorConfig(next);
+      if (errors.length) {
+        alert(`Cannot save processor:\n- ${errors.join("\n- ")}`);
+        return;
+      }
+      opts.onSave(next);
+      close();
+    };
 
     const header = h("div", { attrs: { id: "plcg-proc-header" } }, [
       h("div", {}, [label]),
-      h("div", {}, [headerClose]),
+      h("div", { className: "plcg-inline plcg-inline-nowrap" }, [
+        h("button", { className: "plcg-btn", on: { click: close } }, ["Close"]),
+        h("button", { className: "plcg-btn", on: { click: handleSave } }, ["Save"]),
+      ]),
     ]);
 
     const body = h("div", { attrs: { id: "plcg-proc-body" } }, [
@@ -114,7 +104,6 @@ export function createProcessorEditor(opts: ProcessorEditorOptions): ProcessorEd
         h("div", {}, [typeSelect]),
       ]),
       fieldsContainer,
-      h("div", { className: "plcg-inline", style: { marginTop: "12px" } }, [saveButton, cancelButton]),
     ]);
 
     modal.innerHTML = "";

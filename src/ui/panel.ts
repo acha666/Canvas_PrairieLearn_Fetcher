@@ -277,8 +277,15 @@ export class Panel {
       if (!dragging) return;
       const dx = e.clientX - startX;
       const dy = e.clientY - startY;
-      this.root.style.left = `${Math.max(0, startLeft + dx)}px`;
-      this.root.style.top = `${Math.max(0, startTop + dy)}px`;
+      const rect = this.root.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+      const maxLeft = Math.max(0, window.innerWidth - width);
+      const maxTop = Math.max(0, window.innerHeight - height);
+      const nextLeft = Math.min(Math.max(startLeft + dx, 0), maxLeft);
+      const nextTop = Math.min(Math.max(startTop + dy, 0), maxTop);
+      this.root.style.left = `${nextLeft}px`;
+      this.root.style.top = `${nextTop}px`;
     });
 
     const persistState = () => {
@@ -292,17 +299,40 @@ export class Panel {
       this.opts.onUiStateChange(this.currentUiState);
     };
 
+    const clampToViewport = (shouldPersist = false) => {
+      const rect = this.root.getBoundingClientRect();
+      const viewportW = window.innerWidth;
+      const viewportH = window.innerHeight;
+      const width = Math.min(rect.width, viewportW);
+      const height = Math.min(rect.height, viewportH);
+
+      if (width !== rect.width) this.root.style.width = `${width}px`;
+      if (height !== rect.height) this.root.style.height = `${height}px`;
+
+      const maxLeft = Math.max(0, viewportW - width);
+      const maxTop = Math.max(0, viewportH - height);
+      const nextLeft = Math.min(Math.max(rect.left, 0), maxLeft);
+      const nextTop = Math.min(Math.max(rect.top, 0), maxTop);
+      this.root.style.left = `${nextLeft}px`;
+      this.root.style.top = `${nextTop}px`;
+
+      if (shouldPersist) persistState();
+    };
+
     window.addEventListener("mouseup", () => {
       if (!dragging) return;
       dragging = false;
-      persistState();
+      clampToViewport(true);
     });
 
     let resizeToken: number | null = null;
     const ro = new ResizeObserver(() => {
       if (resizeToken !== null) cancelAnimationFrame(resizeToken);
-      resizeToken = requestAnimationFrame(persistState);
+      resizeToken = requestAnimationFrame(() => clampToViewport(true));
     });
     ro.observe(this.root);
+
+    window.addEventListener("resize", () => clampToViewport(true));
+    clampToViewport(true);
   }
 }

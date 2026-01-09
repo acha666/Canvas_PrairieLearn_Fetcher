@@ -136,24 +136,60 @@ export function createConfigModal(handlers: ConfigModalHandlers) {
       ["Add parser"]
     );
 
-    container.appendChild(h("div", { className: "plcg-inline" }, [addBtn]));
     container.appendChild(table);
+    container.appendChild(h("div", { className: "plcg-inline", style: { marginTop: "10px" } }, [addBtn]));
   };
 
   const render = () => {
     modal.innerHTML = "";
     modal.appendChild(processorEditor.backdrop);
 
-    const header = h("div", { attrs: { id: "plcg-config-header" } }, [
-      h("div", {}, ["Configuration"]),
-      h("div", {}, [h("button", { className: "plcg-btn", on: { click: close } }, ["Close"])]),
-    ]);
-
     const baseUrlInput = h("input", { attrs: { value: config.plBaseUrl, placeholder: "https://us.prairielearn.com" } });
     const apiKeyInput = h("input", { attrs: { value: config.apiKey, placeholder: "Personal Access Token", type: "password" } });
     const courseInput = h("input", { attrs: { value: config.courseInstanceId, placeholder: "e.g. 29832" } });
     const includeHeaderCheckbox = h("input", { attrs: { type: "checkbox" } });
     includeHeaderCheckbox.checked = Boolean(config.includeOutputHeader);
+
+    const handleSave = () => {
+      const nextConfig: Config = {
+        plBaseUrl: String(baseUrlInput.value || "").trim(),
+        apiKey: String(apiKeyInput.value || "").trim(),
+        courseInstanceId: String(courseInput.value || "").trim(),
+        includeOutputHeader: Boolean(includeHeaderCheckbox.checked),
+      };
+
+      const errors: string[] = [];
+      if (!nextConfig.plBaseUrl) errors.push("PrairieLearn Base URL is empty");
+      if (!/^https?:\/\//i.test(nextConfig.plBaseUrl)) errors.push("PrairieLearn Base URL must start with http(s)://");
+      if (!nextConfig.apiKey) errors.push("API Key is empty");
+      if (!nextConfig.courseInstanceId) errors.push("Course Instance ID is empty");
+
+      const parserErrors: string[] = [];
+      parsers.forEach((p, i) => {
+        if (!p.questionId) parserErrors.push(`Parser #${i + 1}: question_id empty`);
+        if (!p.assessmentId) parserErrors.push(`Parser #${i + 1}: assessment_id empty`);
+        if ((p.multiSubmissions || "latest") !== "latest") parserErrors.push(`Parser #${i + 1}: only multi_submissions=latest supported`);
+        p.processor = normalizeProcessorConfig(p.processor);
+        const procErrs = validateProcessorConfig(p.processor);
+        if (procErrs.length) parserErrors.push(`Parser #${i + 1}: ${procErrs.join("; ")}`);
+      });
+
+      if (errors.length || parserErrors.length) {
+        alert(`Save failed:\n- ${errors.concat(parserErrors).join("\n- ")}`);
+        return;
+      }
+
+      handlers.onSave({ config: nextConfig, parsers: [...parsers], students: [...students] });
+      close();
+    };
+
+    const header = h("div", { attrs: { id: "plcg-config-header" } }, [
+      h("div", {}, ["Configuration"]),
+      h("div", { className: "plcg-inline plcg-inline-nowrap" }, [
+        h("button", { className: "plcg-btn", on: { click: close } }, ["Close"]),
+        h("button", { className: "plcg-btn", on: { click: handleSave } }, ["Save"]),
+      ]),
+    ]);
 
     const body = h("div", { attrs: { id: "plcg-config-body" } });
 
@@ -169,7 +205,7 @@ export function createConfigModal(handlers: ConfigModalHandlers) {
     body.appendChild(
       h("div", { className: "plcg-field" }, [
         h("div", {}, ["Include output header"]),
-        h("div", {}, [h("div", { className: "plcg-inline" }, [includeHeaderCheckbox, h("span", { className: "plcg-muted" }, ["Write a C/C++ block comment header"])])]),
+        h("div", {}, [h("div", { className: "plcg-inline plcg-inline-nowrap" }, [includeHeaderCheckbox, h("span", { className: "plcg-muted" }, ["Write a C/C++ block comment header"])])]),
       ])
     );
 
@@ -202,12 +238,14 @@ export function createConfigModal(handlers: ConfigModalHandlers) {
     );
 
     body.appendChild(
-      h("div", { className: "plcg-field" }, [
+      h("div", { className: "plcg-field plcg-align-top" }, [
         h("div", {}, ["Import students (CSV)"]),
         h("div", {}, [
           studentTa,
-          h("div", { className: "plcg-inline", style: { marginTop: "8px" } }, [importBtn]),
-          h("div", { className: "plcg-help" }, [`Saved: ${students.length} entries`]),
+          h("div", { className: "plcg-inline plcg-inline-nowrap", style: { marginTop: "8px" } }, [
+            importBtn,
+            h("div", { className: "plcg-help plcg-help-inline" }, [`Saved: ${students.length} entries`]),
+          ]),
         ]),
       ])
     );
@@ -215,54 +253,10 @@ export function createConfigModal(handlers: ConfigModalHandlers) {
     const parserContainer = h("div", { attrs: { id: "plcg-parser-container" } });
     parserContainerRef = parserContainer;
     body.appendChild(
-      h("div", { className: "plcg-field" }, [h("div", {}, ["Parser configuration"]), h("div", {}, [parserContainer])])
+      h("div", { className: "plcg-field plcg-align-top" }, [h("div", {}, ["Parser configuration"]), h("div", {}, [parserContainer])])
     );
 
     renderParsers(parserContainer);
-
-    const saveBtn = h(
-      "button",
-      {
-        className: "plcg-btn",
-        on: {
-          click: () => {
-            const nextConfig: Config = {
-              plBaseUrl: String(baseUrlInput.value || "").trim(),
-              apiKey: String(apiKeyInput.value || "").trim(),
-              courseInstanceId: String(courseInput.value || "").trim(),
-              includeOutputHeader: Boolean(includeHeaderCheckbox.checked),
-            };
-
-            const errors: string[] = [];
-            if (!nextConfig.plBaseUrl) errors.push("PrairieLearn Base URL is empty");
-            if (!/^https?:\/\//i.test(nextConfig.plBaseUrl)) errors.push("PrairieLearn Base URL must start with http(s)://");
-            if (!nextConfig.apiKey) errors.push("API Key is empty");
-            if (!nextConfig.courseInstanceId) errors.push("Course Instance ID is empty");
-
-            const parserErrors: string[] = [];
-            parsers.forEach((p, i) => {
-              if (!p.questionId) parserErrors.push(`Parser #${i + 1}: question_id empty`);
-              if (!p.assessmentId) parserErrors.push(`Parser #${i + 1}: assessment_id empty`);
-              if ((p.multiSubmissions || "latest") !== "latest") parserErrors.push(`Parser #${i + 1}: only multi_submissions=latest supported`);
-              p.processor = normalizeProcessorConfig(p.processor);
-              const procErrs = validateProcessorConfig(p.processor);
-              if (procErrs.length) parserErrors.push(`Parser #${i + 1}: ${procErrs.join("; ")}`);
-            });
-
-            if (errors.length || parserErrors.length) {
-              alert(`Save failed:\n- ${errors.concat(parserErrors).join("\n- ")}`);
-              return;
-            }
-
-            handlers.onSave({ config: nextConfig, parsers: [...parsers], students: [...students] });
-            close();
-          },
-        },
-      },
-      ["Save"]
-    );
-
-    body.appendChild(h("div", { className: "plcg-inline", style: { marginTop: "14px" } }, [saveBtn, h("button", { className: "plcg-btn", on: { click: close } }, ["Close"])]));
 
     modal.appendChild(header);
     modal.appendChild(body);
