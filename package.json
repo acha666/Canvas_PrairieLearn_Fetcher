@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
+    "@types/papaparse": "^5.5.2",
     "@types/tampermonkey": "^5.0.5",
     "@typescript-eslint/eslint-plugin": "^8.52.0",
     "@typescript-eslint/parser": "^8.52.0",
