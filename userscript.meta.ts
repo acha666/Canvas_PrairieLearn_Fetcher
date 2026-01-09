@@ -5,7 +5,7 @@ export const USERSCRIPT = {
     namespace: "acha666.Canvas_PrairieLearn_Fetcher",
     description:
         "In Canvas SpeedGrader, fetch PrairieLearn submissions for the current student and write decoded text to a chosen output file.",
-    match: [/^https:\/\/canvas\.[a-z0-9]*?\.[a-z]*?\/courses\/*\/gradebook\/speed_grader.*$/],
+    include: [/^https:\/\/canvas\.[a-z0-9]*?\.[a-z]*?\/courses\/[0-9]*?\/gradebook\/speed_grader.*$/],
     connect: ["*"],
     grant: [
         "GM_xmlhttpRequest",
