@@ -50,6 +50,7 @@ let statusKind: PanelRenderState["statusKind"] = "muted";
 const aiCacheByAssessmentId = new Map<string, AssessmentInstanceCache>();
 
 function migrateLegacyAssessmentId(): void {
+  // Promote legacy root-level assessment_id into each parser config
   const raw = loadConfigRaw();
   const legacy = String((raw as Record<string, unknown>)?.assessmentId ?? "").trim();
   if (!legacy) return;
@@ -312,6 +313,7 @@ function handleConfigSaved(snapshot: ConfigModalSnapshot): void {
 }
 
 function watchStudentChanges(): void {
+  // Trigger re-render when SpeedGrader navigates to a different student
   let lastStudentId = getQueryParam("student_id");
   const check = async () => {
     const sid = getQueryParam("student_id");
@@ -328,6 +330,7 @@ function watchStudentChanges(): void {
 async function refreshWhenReady(reason = "auto"): Promise<void> {
   const started = Date.now();
   let delay = 250;
+  // Wait for SpeedGrader to surface student info before first render
   while (Date.now() - started < 25_000) {
     if (isSpeedGraderReady()) break;
     await sleep(delay);

@@ -28,7 +28,7 @@ export function safeJsonParse<T>(raw: unknown, fallback: T): T {
     const value = JSON5.parse(text) as T;
     return value === null || value === undefined ? fallback : value;
   } catch {
-    // continue
+    // Fallback to standard JSON parse
   }
 
   try {

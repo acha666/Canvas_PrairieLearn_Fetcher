@@ -256,6 +256,7 @@ export class Panel {
   }
 
   private attachDrag(): void {
+    // Enable dragging/resizing while keeping the panel inside the viewport and persisting position
     let dragging = false;
     let startX = 0;
     let startY = 0;

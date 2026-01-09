@@ -27,6 +27,7 @@ function canonicalizeForCompare(name: string): string {
   return normName(canonicalizeName(name));
 }
 
+// Fuzzy compare Canvas UI name vs CSV name, handling commas and truncated ellipsis
 export function namesMatch(uiName: string, csvName: string): boolean {
   const uiCanon = canonicalizeForCompare(uiName);
   const csvCanon = canonicalizeForCompare(csvName);

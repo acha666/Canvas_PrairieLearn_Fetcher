@@ -32,6 +32,6 @@ export function watchSpeedGraderName(onChange: () => void): void {
   try {
     observer.observe(document.body, { childList: true, subtree: true });
   } catch {
-    // ignore
+    // Some pages block MutationObserver; fall back to no-op
   }
 }

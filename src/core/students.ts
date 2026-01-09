@@ -54,6 +54,7 @@ export function parseStudentsFromCsv(text: string): ParseStudentsResult {
   const errors: string[] = [];
   const students: Student[] = [];
 
+  // Switch parsing strategy based on Canvas Gradebook header
   const isGradebook = detectGradebookHeader(raw);
 
   if (isGradebook) {
