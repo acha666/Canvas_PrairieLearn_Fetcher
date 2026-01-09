@@ -8,7 +8,7 @@ import type {
 } from "../../core/types";
 import { fileProcessor } from "./file";
 
-const REGISTRY: Record<ProcessorType, ProcessorDescriptor<any>> = {
+const REGISTRY: Record<ProcessorType, ProcessorDescriptor> = {
   file: fileProcessor,
 };
 

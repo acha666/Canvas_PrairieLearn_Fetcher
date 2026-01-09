@@ -1,5 +1,5 @@
-import styles from "../ui/styles.css?inline";
-import { gmAddStyle } from "platform/gm";
+import styles from "./ui/styles.css?inline";
+import { gmAddStyle } from "./platform/gm";
 import {
   clearAssessmentInstanceCache,
   loadAssessmentInstanceCache,
@@ -14,7 +14,7 @@ import {
   saveParsers,
   saveStudents,
   saveUiState,
-} from "core/storage";
+} from "./core/storage";
 import type {
   AssessmentInstanceCache,
   Config,
@@ -23,17 +23,17 @@ import type {
   ProcessorRunResult,
   Student,
   UiState,
-} from "core/types";
-import { nowIso, sleep } from "core/time";
-import { getQueryParam } from "core/utils";
-import { namesMatch } from "core/nameMatch";
-import { fetchAssessmentInstances, fetchSubmissions } from "pl/api";
-import { normalizeProcessorConfig, runProcessor } from "pl/processors";
-import { hookHistory, onLocationChange } from "canvas/navigation";
-import { getSpeedGraderDisplayedName, isSpeedGraderReady, watchSpeedGraderName } from "canvas/dom";
-import { Panel, type IdentityState, type PanelRenderState } from "ui/panel";
-import { createConfigModal, type ConfigModalSnapshot } from "ui/configModal";
-import { fileName, OutputFileHandle, pickOutputFile, writeTextFile } from "platform/fs";
+} from "./core/types";
+import { nowIso, sleep } from "./core/time";
+import { getQueryParam } from "./core/utils";
+import { namesMatch } from "./core/nameMatch";
+import { fetchAssessmentInstances, fetchSubmissions } from "./pl/api";
+import { normalizeProcessorConfig, runProcessor } from "./pl/processors";
+import { hookHistory, onLocationChange } from "./canvas/navigation";
+import { getSpeedGraderDisplayedName, isSpeedGraderReady, watchSpeedGraderName } from "./canvas/dom";
+import { Panel, type IdentityState, type PanelRenderState } from "./ui/panel";
+import { createConfigModal, type ConfigModalSnapshot } from "./ui/configModal";
+import { fileName, OutputFileHandle, pickOutputFile, writeTextFile } from "./platform/fs";
 
 // Inject styles early
 gmAddStyle(styles);
