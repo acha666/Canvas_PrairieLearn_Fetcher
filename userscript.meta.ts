@@ -6,7 +6,7 @@ export const USERSCRIPT = {
     description:
         "In Canvas SpeedGrader, fetch PrairieLearn submissions for the current student and write decoded text to a chosen output file.",
     include: [/^https:\/\/canvas\.[a-z0-9]*?\.[a-z]*?\/courses\/[0-9]*?\/gradebook\/speed_grader.*$/],
-    connect: ["*"],
+    connect: ["us.prairielearn.com"],
     grant: [
         "GM_xmlhttpRequest",
         "GM_addStyle",
