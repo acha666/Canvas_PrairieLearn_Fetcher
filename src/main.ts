@@ -47,25 +47,6 @@ let statusKind: PanelRenderState["statusKind"] = "muted";
 
 let cacheProvider = new AssessmentCacheProvider(config.courseInstanceId);
 
-function migrateLegacyAssessmentId(): void {
-  // Promote legacy root-level assessment_id into each parser config
-  const raw = loadConfigRaw();
-  const legacy = String((raw as Record<string, unknown>)?.assessmentId ?? "").trim();
-  if (!legacy) return;
-  const ps = loadParsers();
-  let changed = false;
-  ps.forEach((p) => {
-    if (!p.assessmentId) {
-      p.assessmentId = legacy;
-      changed = true;
-    }
-  });
-  if (changed) saveParsers(ps);
-  const cleaned = { ...raw } as Record<string, unknown>;
-  delete cleaned.assessmentId;
-  localStorage.setItem(LS.CONFIG, JSON.stringify(cleaned));
-}
-
 function setStatus(text: string, kind: PanelRenderState["statusKind"] = "muted"): void {
   statusText = text;
   statusKind = kind;
@@ -323,8 +304,6 @@ async function refreshWhenReady(reason = "auto"): Promise<void> {
 }
 
 function start(): void {
-  migrateLegacyAssessmentId();
-
   document.body.appendChild(configModal.backdrop);
   panel.mount(document.body);
 
