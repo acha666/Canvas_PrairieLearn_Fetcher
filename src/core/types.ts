@@ -84,6 +84,12 @@ export interface PrairieLearnSubmission {
     _files?: PrairieLearnSubmissionFile[];
     [key: string]: unknown;
   };
+  instance_question_points?: number;
+  instance_question_auto_points?: number;
+  instance_question_manual_points?: number;
+  assessment_question_max_points?: number;
+  assessment_question_max_auto_points?: number;
+  assessment_question_max_manual_points?: number;
   [key: string]: unknown;
 }
 
