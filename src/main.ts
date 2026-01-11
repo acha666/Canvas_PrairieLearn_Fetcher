@@ -111,19 +111,29 @@ function buildOutputHeaderBlock(args: {
   picked: { submission: PrairieLearnSubmission; candidates?: number };
   proc: ProcessorRunResult;
 }): string {
+  const sub = args.picked.submission;
+
+  const totalPoints = sub.instance_question_points ?? -1;
+  const autoPoints = sub.instance_question_auto_points ?? -1;
+  const manualPoints = sub.instance_question_manual_points ?? -1;
+  const maxPoints = sub.assessment_question_max_points ?? -1;
+  const maxAutoPoints = sub.assessment_question_max_auto_points ?? -1;
+  const maxManualPoints = sub.assessment_question_max_manual_points ?? -1;
+  const scoreInfo = `Attempt ${totalPoints}(${autoPoints}+${manualPoints}) / Max ${maxPoints}(${maxAutoPoints}+${maxManualPoints})`;
+
+  const studentInfo = `${args.student.name} (${args.student.canvasId}, ${args.student.sisUserId}, ${args.student.sisLoginId})`;
+  const assessmentInfo = `${args.assessmentId} (Instance ${args.assessmentInstanceId}) Question ${args.parser.questionId}`;
+  const submissionInfo = `${args.picked.submission.submission_id} (Candidates=${args.picked.candidates ?? -1}, Strategy=latest)`
+
   const lines = [
-    "PrairieLearn Submission Export",
-    `Time: ${new Date().toLocaleString()}`,
-    `Student: ${args.student.name}`,
-    `Canvas ID: ${args.student.canvasId}`,
-    `SIS User ID: ${args.student.sisUserId}`,
-    `SIS Login ID (user_uin): ${args.student.sisLoginId}`,
-    `assessment_id: ${args.assessmentId}`,
-    `assessment_instance_id: ${args.assessmentInstanceId}`,
-    `question_id: ${args.parser.questionId}`,
-    `selected_submission_id: ${args.picked.submission.submission_id} (candidates=${args.picked.candidates ?? 1}, strategy=latest)`,
-    `submission_date: ${args.picked.submission.date || ""}`,
-    `file: ${args.proc.fileName ?? ""}`,
+    "--- PrairieLearn Submission Export ---",
+    `Generated: ${new Date().toLocaleString()}`,
+    `Student: ${studentInfo}`,
+    `Assessment: ${assessmentInfo}`,
+    `Submission: ${submissionInfo}`,
+    `Submitted: ${args.picked.submission.date || "null"}`,
+    `Score: ${scoreInfo}`,
+    `File: ${args.proc.fileName ?? "null"}`,
   ];
   return "/**\n" + lines.map((l) => ` * ${l}`).join("\n") + "\n */\n\n";
 }
