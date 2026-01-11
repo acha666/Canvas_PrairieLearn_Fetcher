@@ -69,8 +69,8 @@ export function createConfigModal(handlers: ConfigModalHandlers) {
     const tbody = h("tbody");
 
     parsers.forEach((p, idx) => {
-      const qInput = h("input", { attrs: { value: p.questionId, placeholder: "e.g. 9270541" } });
-      const aInput = h("input", { attrs: { value: p.assessmentId, placeholder: "e.g. 2630582" } });
+      const qInput = h("input", { attrs: { value: p.questionId, placeholder: "1234567" } });
+      const aInput = h("input", { attrs: { value: p.assessmentId, placeholder: "1234567" } });
       const multiSelect = h("select", {}, [h("option", { attrs: { value: "latest" } }, ["latest"])]);
       multiSelect.value = p.multiSubmissions;
 
@@ -145,8 +145,8 @@ export function createConfigModal(handlers: ConfigModalHandlers) {
     modal.appendChild(processorEditor.backdrop);
 
     const baseUrlInput = h("input", { attrs: { value: config.plBaseUrl, placeholder: "https://us.prairielearn.com" } });
-    const apiKeyInput = h("input", { attrs: { value: config.apiKey, placeholder: "Personal Access Token", type: "password" } });
-    const courseInput = h("input", { attrs: { value: config.courseInstanceId, placeholder: "e.g. 29832" } });
+    const apiKeyInput = h("input", { attrs: { value: config.apiKey, placeholder: "00001111-2222-3333-4444-555566667777", type: "password" } });
+    const courseInput = h("input", { attrs: { value: config.courseInstanceId, placeholder: "12345" } });
     const includeHeaderCheckbox = h("input", { attrs: { type: "checkbox" } });
     includeHeaderCheckbox.checked = Boolean(config.includeOutputHeader);
 
