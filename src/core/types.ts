@@ -90,6 +90,15 @@ export interface PrairieLearnSubmission {
   assessment_question_max_points?: number;
   assessment_question_max_auto_points?: number;
   assessment_question_max_manual_points?: number;
+  score: number;
+  feedback: {
+    results?: {
+      score?: number;
+      points?: number;
+      max_points?: number;
+    };
+    [key: string]: unknown;
+  };
   [key: string]: unknown;
 }
 
