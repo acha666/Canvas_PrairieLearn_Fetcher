@@ -13,6 +13,9 @@ export default defineConfig({
         ...USERSCRIPT,
         version: String(pkg.version ?? "0.0.0"),
       },
+      server: {
+        mountGmApi: true,
+      },
     }),
   ],
   resolve: {

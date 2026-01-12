@@ -89,16 +89,39 @@ function selectLatestSubmission(submissions: PrairieLearnSubmission[], questionI
   const hits = (submissions || []).filter((s) => String(s.question_id || "").trim() === qid);
   if (!hits.length) return { error: `No submission for question_id=${qid}` };
 
-  let best = hits[0];
-  let bestTime = Date.parse(best.date || "") || 0;
-  hits.forEach((item) => {
-    const t = Date.parse(item.date || "") || 0;
-    if (t >= bestTime) {
-      best = item;
-      bestTime = t;
-    }
-  });
-  return { submission: best, candidates: hits.length };
+  // Look for final_submission_per_variant === true
+  const finalSubmissions = hits.filter(s => s.final_submission_per_variant === true);
+
+  if (finalSubmissions.length > 1) {
+    return { error: `Multiple submissions with final_submission_per_variant=true (found ${finalSubmissions.length})` };
+  }
+
+  if (finalSubmissions.length === 1) {
+    return { submission: finalSubmissions[0], candidates: hits.length };
+  }
+
+  // Error: no submission with final_submission_per_variant=true
+  return { error: `No submission with final_submission_per_variant=true found (total candidates: ${hits.length})` };
+}
+
+function selectBestSubmission(submissions: PrairieLearnSubmission[], questionId: string): { submission?: PrairieLearnSubmission; candidates?: number; error?: string } {
+  const qid = String(questionId || "").trim();
+  const hits = (submissions || []).filter((s) => String(s.question_id || "").trim() === qid);
+  if (!hits.length) return { error: `No submission for question_id=${qid}` };
+
+  // Look for best_submission_per_variant === true
+  const bestSubmissions = hits.filter(s => s.best_submission_per_variant === true);
+
+  if (bestSubmissions.length > 1) {
+    return { error: `Multiple submissions with best_submission_per_variant=true (found ${bestSubmissions.length})` };
+  }
+
+  if (bestSubmissions.length === 1) {
+    return { submission: bestSubmissions[0], candidates: hits.length };
+  }
+
+  // Error: no submission with best_submission_per_variant=true
+  return { error: `No submission with best_submission_per_variant=true found (total candidates: ${hits.length})` };
 }
 
 function buildOutputHeaderBlock(args: {
@@ -109,19 +132,23 @@ function buildOutputHeaderBlock(args: {
   picked: { submission: PrairieLearnSubmission; candidates?: number };
   proc: ProcessorRunResult;
 }): string {
-  const sub = args.picked.submission;
+  const { picked, student, assessmentId, assessmentInstanceId, parser, proc } = args;
+  const sub = picked.submission;
 
-  const totalPoints = sub.instance_question_points ?? -1;
-  const autoPoints = sub.instance_question_auto_points ?? -1;
-  const manualPoints = sub.instance_question_manual_points ?? -1;
-  const maxPoints = sub.assessment_question_max_points ?? -1;
-  const maxAutoPoints = sub.assessment_question_max_auto_points ?? -1;
-  const maxManualPoints = sub.assessment_question_max_manual_points ?? -1;
-  const scoreInfo = `Attempt ${totalPoints}(${autoPoints}+${manualPoints}) / Max ${maxPoints}(${maxAutoPoints}+${maxManualPoints})`;
+  const safeNum = (val: number | null | undefined): string => (typeof val === "number" ? String(val) : "-");
+  
+  const questionScoreParts = [
+    `Best ${safeNum(sub.instance_question_points)}(${safeNum(sub.instance_question_auto_points)}+${safeNum(sub.instance_question_manual_points)})`,
+    `Max ${safeNum(sub.assessment_question_max_points)}(${safeNum(sub.assessment_question_max_auto_points)}+${safeNum(sub.assessment_question_max_manual_points)})`,
+    "!!! This may not be the score for this attempt !!!",
+  ];
+  const questionScoreInfo = `${questionScoreParts[0]} / ${questionScoreParts[1]} ${questionScoreParts[2]}`;
 
-  const studentInfo = `${args.student.name} (${args.student.canvasId}, ${args.student.sisUserId}, ${args.student.sisLoginId})`;
-  const assessmentInfo = `${args.assessmentId} (Instance ${args.assessmentInstanceId}) Question ${args.parser.questionId}`;
-  const submissionInfo = `${args.picked.submission.submission_id} (Candidates=${args.picked.candidates ?? -1}, Strategy=latest)`
+  const attemptScoreInfo = `Score=${safeNum(sub.score)}, Points=${safeNum(sub.feedback.results?.points)}/${safeNum(sub.feedback.results?.max_points)}`;
+  const studentInfo = `${student.name} (${student.canvasId}, ${student.sisUserId}, ${student.sisLoginId})`;
+  const assessmentInfo = `${assessmentId} (Instance ${assessmentInstanceId}) Question ${parser.questionId}`;
+  const strategy = parser.multiSubmissions || "null";
+  const submissionInfo = `${sub.submission_id} (Candidates=${picked.candidates ?? -1}, Strategy=${strategy})`;
 
   const lines = [
     "--- PrairieLearn Submission Export ---",
@@ -129,11 +156,13 @@ function buildOutputHeaderBlock(args: {
     `Student: ${studentInfo}`,
     `Assessment: ${assessmentInfo}`,
     `Submission: ${submissionInfo}`,
-    `Submitted: ${args.picked.submission.date || "null"}`,
-    `Score: ${scoreInfo}`,
-    `File: ${args.proc.fileName ?? "null"}`,
+    `Submitted: ${sub.date || "null"}`,
+    `Score for Question: ${questionScoreInfo}`,
+    `Score for Attempt: ${attemptScoreInfo}`,
+    `File: ${proc.fileName ?? "null"}`,
   ];
-  return "/**\n" + lines.map((l) => ` * ${l}`).join("\n") + "\n */\n\n";
+
+  return "/**\n" + lines.map((line) => ` * ${line}`).join("\n") + "\n */\n\n";
 }
 
 async function refreshAssessmentInstancesFor(assessmentId: string): Promise<void> {
@@ -211,7 +240,12 @@ async function handleFetch(parser: ParserConfig, index: number): Promise<void> {
       courseInstanceId: config.courseInstanceId,
       assessmentInstanceId,
     });
-    const picked = selectLatestSubmission(submissions, parser.questionId);
+
+    const strategy = parser.multiSubmissions || "best";
+    const picked = strategy === "best"
+      ? selectBestSubmission(submissions, parser.questionId)
+      : selectLatestSubmission(submissions, parser.questionId);
+
     if (picked.error || !picked.submission) throw new Error(picked.error || "No submission selected");
 
     const proc = runProcessor(picked.submission, parser.processor);
