@@ -71,7 +71,10 @@ export function createConfigModal(handlers: ConfigModalHandlers) {
     parsers.forEach((p, idx) => {
       const qInput = h("input", { attrs: { value: p.questionId, placeholder: "1234567" } });
       const aInput = h("input", { attrs: { value: p.assessmentId, placeholder: "1234567" } });
-      const multiSelect = h("select", {}, [h("option", { attrs: { value: "latest" } }, ["latest"])]);
+      const multiSelect = h("select", {}, [
+        h("option", { attrs: { value: "best" } }, ["best"]),
+        h("option", { attrs: { value: "latest" } }, ["latest"])
+      ]);
       multiSelect.value = p.multiSubmissions;
 
       const procBtn = h(
@@ -96,7 +99,8 @@ export function createConfigModal(handlers: ConfigModalHandlers) {
       const sync = () => {
         p.questionId = String(qInput.value || "").trim();
         p.assessmentId = String(aInput.value || "").trim();
-        p.multiSubmissions = String(multiSelect.value || "latest") as ParserConfig["multiSubmissions"];
+        const val = String(multiSelect.value || "best");
+        p.multiSubmissions = (val === "latest" || val === "best" ? val : "best") as ParserConfig["multiSubmissions"];
         p.processor = normalizeProcessorConfig(p.processor);
       };
 
@@ -126,7 +130,7 @@ export function createConfigModal(handlers: ConfigModalHandlers) {
             parsers.push({
               questionId: "",
               assessmentId: "",
-              multiSubmissions: "latest",
+              multiSubmissions: "best",
               processor: normalizeProcessorConfig({ type: "file", params: { file_index: 0 } }),
             });
             renderParsers(parserContainerRef);
@@ -168,7 +172,8 @@ export function createConfigModal(handlers: ConfigModalHandlers) {
       parsers.forEach((p, i) => {
         if (!p.questionId) parserErrors.push(`Parser #${i + 1}: question_id empty`);
         if (!p.assessmentId) parserErrors.push(`Parser #${i + 1}: assessment_id empty`);
-        if ((p.multiSubmissions || "latest") !== "latest") parserErrors.push(`Parser #${i + 1}: only multi_submissions=latest supported`);
+        const ms = p.multiSubmissions || "best";
+        if (ms !== "latest" && ms !== "best") parserErrors.push(`Parser #${i + 1}: multi_submissions must be 'latest' or 'best'`);
         p.processor = normalizeProcessorConfig(p.processor);
         const procErrs = validateProcessorConfig(p.processor);
         if (procErrs.length) parserErrors.push(`Parser #${i + 1}: ${procErrs.join("; ")}`);

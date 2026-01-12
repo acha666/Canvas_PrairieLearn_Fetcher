@@ -171,14 +171,14 @@ function normalizeParser(raw: unknown): ParserConfig | null {
 
   const questionId = String(obj.questionId ?? obj.question_id ?? "").trim();
   const assessmentId = String(obj.assessmentId ?? obj.assessment_id ?? "").trim();
-  const multiSubmissions = String(obj.multiSubmissions ?? obj.multi_submissions ?? "latest").trim() || "latest";
+  const multiSubmissions = String(obj.multiSubmissions ?? obj.multi_submissions ?? "best").trim() || "best";
 
   if (!questionId || !assessmentId) return null;
 
   return {
     questionId,
     assessmentId,
-    multiSubmissions: multiSubmissions === "latest" ? "latest" : "latest",
+    multiSubmissions: (multiSubmissions === "latest" || multiSubmissions === "best") ? multiSubmissions : "best",
     processor: normalizeProcessorConfig(obj.processor),
   };
 }
