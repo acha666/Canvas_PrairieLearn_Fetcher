@@ -131,7 +131,7 @@ export const templateProcessor: ProcessorDescriptor<TemplateProcessorParams> = {
     {
       key: "template",
       label: "Template",
-      type: "text",
+      type: "textarea",
       placeholder: "Answer: ${field_name}",
       helperText: "Use ${path.to.field} to extract values from submitted_answer. Examples: ${bin_2digit._value.0} for arrays, ${nested.field} for objects. Arrays are joined with separator.",
     },
