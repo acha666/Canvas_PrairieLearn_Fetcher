@@ -48,22 +48,25 @@ export function createProcessorEditor(opts: ProcessorEditorOptions): ProcessorEd
       fieldsContainer.innerHTML = "";
       const descriptorFields = processorFields({ type: typeSelect.value as ProcessorConfig["type"], params: normalized.params });
       descriptorFields.forEach((field) => {
-        const input = h("input", {
+        const isTextarea = field.type === "textarea";
+        const inputElement = isTextarea ? "textarea" : "input";
+        const input = h(inputElement, {
           attrs: {
-            type: field.type,
+            ...(isTextarea ? {} : { type: field.type }),
             placeholder: field.placeholder ?? "",
             value: String((normalized.params as Record<string, unknown>)[field.key] ?? ""),
           },
           on: {
             input: (ev) => {
-              const target = ev.target as HTMLInputElement;
+              const target = ev.target as HTMLInputElement | HTMLTextAreaElement;
               const val = field.type === "number" ? Number(target.value) : target.value;
               (normalized.params as Record<string, unknown>)[field.key] = val;
             },
           },
         });
 
-        const row = h("div", { className: "plcg-field" }, [
+        const rowClass = isTextarea ? "plcg-field plcg-align-top" : "plcg-field";
+        const row = h("div", { className: rowClass }, [
           h("div", {}, [field.label]),
           h("div", {}, [input, field.helperText ? h("div", { className: "plcg-help" }, [field.helperText]) : null]),
         ]);

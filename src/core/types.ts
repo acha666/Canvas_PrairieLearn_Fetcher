@@ -1,4 +1,4 @@
-export type ProcessorType = "file";
+export type ProcessorType = "file" | "template";
 
 export type ProcessorParamsValue = string | number | boolean;
 export type ProcessorParams = Record<string, ProcessorParamsValue>;
@@ -6,7 +6,7 @@ export type ProcessorParams = Record<string, ProcessorParamsValue>;
 export interface ProcessorField {
   key: string;
   label: string;
-  type: "text" | "number";
+  type: "text" | "number" | "textarea";
   placeholder?: string;
   helperText?: string;
 }
