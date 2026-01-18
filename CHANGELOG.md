@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/acha666/Canvas_PrairieLearn_Fetcher/compare/canvas-prairielearn-fetcher-v1.2.0...canvas-prairielearn-fetcher-v1.3.0) (2026-01-18)
+
+
+### Features
+
+* add template processor ([bab186c](https://github.com/acha666/Canvas_PrairieLearn_Fetcher/commit/bab186c0ddde88b12339e10c0d57741d911b861b))
+* support textarea input type in processor fields ([3482323](https://github.com/acha666/Canvas_PrairieLearn_Fetcher/commit/348232346f5806fad54c0b8f49ee8baed828be2a))
+
+
+### Bug Fixes
+
+* change build command to 'build-only' in CI workflow ([d803a38](https://github.com/acha666/Canvas_PrairieLearn_Fetcher/commit/d803a3821d934419f8e03b95837292eb44cd3e59))
+
 ## [1.2.0](https://github.com/acha666/Canvas_PrairieLearn_Fetcher/compare/canvas-prairielearn-fetcher-v1.1.0...canvas-prairielearn-fetcher-v1.2.0) (2026-01-12)
 
 
