@@ -38,7 +38,7 @@ jobs:
         run: pnpm type-check
 
       - name: Build
-        run: pnpm build
+        run: pnpm build-only
 
       - name: Upload dist
         uses: actions/upload-artifact@v4
