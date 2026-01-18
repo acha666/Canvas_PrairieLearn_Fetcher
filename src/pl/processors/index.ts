@@ -7,9 +7,11 @@ import type {
   ProcessorType,
 } from "../../core/types";
 import { fileProcessor } from "./file";
+import { templateProcessor } from "./template";
 
 const REGISTRY: Record<ProcessorType, ProcessorDescriptor> = {
   file: fileProcessor,
+  template: templateProcessor,
 };
 
 function getDescriptor(type: ProcessorType): ProcessorDescriptor | undefined {

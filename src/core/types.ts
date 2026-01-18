@@ -1,4 +1,4 @@
-export type ProcessorType = "file";
+export type ProcessorType = "file" | "template";
 
 export type ProcessorParamsValue = string | number | boolean;
 export type ProcessorParams = Record<string, ProcessorParamsValue>;
