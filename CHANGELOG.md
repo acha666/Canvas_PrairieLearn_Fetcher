@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/acha666/Canvas_PrairieLearn_Fetcher/compare/canvas-prairielearn-fetcher-v1.3.0...canvas-prairielearn-fetcher-v2.0.0) (2026-01-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* best mode now uses local score calculation instead of relying on PrairieLearn API's best_submission_per_variant flag.
+
+### Features
+
+* change best mode to local score calculation ([5c60a3c](https://github.com/acha666/Canvas_PrairieLearn_Fetcher/commit/5c60a3cd9f956bba6397701b298db93996a7d7e7))
+
 ## [1.3.0](https://github.com/acha666/Canvas_PrairieLearn_Fetcher/compare/canvas-prairielearn-fetcher-v1.2.0...canvas-prairielearn-fetcher-v1.3.0) (2026-01-18)
 
 
