@@ -72,7 +72,8 @@ export function createConfigModal(handlers: ConfigModalHandlers) {
       const qInput = h("input", { attrs: { value: p.questionId, placeholder: "1234567" } });
       const aInput = h("input", { attrs: { value: p.assessmentId, placeholder: "1234567" } });
       const multiSelect = h("select", {}, [
-        h("option", { attrs: { value: "best" } }, ["best"]),
+        h("option", { attrs: { value: "best" } }, ["best (local score)"]),
+        h("option", { attrs: { value: "api-best" } }, ["api-best (PL API)"]),
         h("option", { attrs: { value: "latest" } }, ["latest"])
       ]);
       multiSelect.value = p.multiSubmissions;
@@ -100,7 +101,7 @@ export function createConfigModal(handlers: ConfigModalHandlers) {
         p.questionId = String(qInput.value || "").trim();
         p.assessmentId = String(aInput.value || "").trim();
         const val = String(multiSelect.value || "best");
-        p.multiSubmissions = (val === "latest" || val === "best" ? val : "best") as ParserConfig["multiSubmissions"];
+        p.multiSubmissions = (val === "latest" || val === "best" || val === "api-best" ? val : "best") as ParserConfig["multiSubmissions"];
         p.processor = normalizeProcessorConfig(p.processor);
       };
 
@@ -173,7 +174,7 @@ export function createConfigModal(handlers: ConfigModalHandlers) {
         if (!p.questionId) parserErrors.push(`Parser #${i + 1}: question_id empty`);
         if (!p.assessmentId) parserErrors.push(`Parser #${i + 1}: assessment_id empty`);
         const ms = p.multiSubmissions || "best";
-        if (ms !== "latest" && ms !== "best") parserErrors.push(`Parser #${i + 1}: multi_submissions must be 'latest' or 'best'`);
+        if (ms !== "latest" && ms !== "best" && ms !== "api-best") parserErrors.push(`Parser #${i + 1}: multi_submissions must be 'latest', 'best', or 'api-best'`);
         p.processor = normalizeProcessorConfig(p.processor);
         const procErrs = validateProcessorConfig(p.processor);
         if (procErrs.length) parserErrors.push(`Parser #${i + 1}: ${procErrs.join("; ")}`);

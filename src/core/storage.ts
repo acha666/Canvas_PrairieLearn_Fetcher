@@ -178,7 +178,7 @@ function normalizeParser(raw: unknown): ParserConfig | null {
   return {
     questionId,
     assessmentId,
-    multiSubmissions: (multiSubmissions === "latest" || multiSubmissions === "best") ? multiSubmissions : "best",
+    multiSubmissions: (multiSubmissions === "latest" || multiSubmissions === "best" || multiSubmissions === "api-best") ? multiSubmissions : "best",
     processor: normalizeProcessorConfig(obj.processor),
   };
 }

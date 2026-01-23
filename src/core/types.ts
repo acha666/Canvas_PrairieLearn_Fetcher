@@ -36,7 +36,7 @@ export interface ProcessorConfig<TParams extends ProcessorParams = ProcessorPara
 export interface ParserConfig {
   questionId: string;
   assessmentId: string;
-  multiSubmissions: "latest" | "best";
+  multiSubmissions: "latest" | "best" | "api-best";
   processor: ProcessorConfig;
 }
 

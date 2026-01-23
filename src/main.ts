@@ -104,7 +104,12 @@ function selectLatestSubmission(submissions: PrairieLearnSubmission[], questionI
   return { error: `No submission with final_submission_per_variant=true found (total candidates: ${hits.length})` };
 }
 
-function selectBestSubmission(submissions: PrairieLearnSubmission[], questionId: string): { submission?: PrairieLearnSubmission; candidates?: number; error?: string } {
+/**
+ * Select best submission based on PrairieLearn API's best_submission_per_variant flag
+ * Note: PL API has a bug (https://github.com/PrairieLearn/PrairieLearn/issues/13898)
+ * where NULL scores are incorrectly prioritized. Use 'best' instead for local calculation.
+ */
+function selectApiBestSubmission(submissions: PrairieLearnSubmission[], questionId: string): { submission?: PrairieLearnSubmission; candidates?: number; error?: string } {
   const qid = String(questionId || "").trim();
   const hits = (submissions || []).filter((s) => String(s.question_id || "").trim() === qid);
   if (!hits.length) return { error: `No submission for question_id=${qid}` };
@@ -122,6 +127,36 @@ function selectBestSubmission(submissions: PrairieLearnSubmission[], questionId:
 
   // Error: no submission with best_submission_per_variant=true
   return { error: `No submission with best_submission_per_variant=true found (total candidates: ${hits.length})` };
+}
+
+/**
+ * Select best submission based on local score calculation (highest score)
+ * This is a workaround for PL API bug where NULL scores are prioritized
+ */
+function selectBestSubmission(submissions: PrairieLearnSubmission[], questionId: string): { submission?: PrairieLearnSubmission; candidates?: number; error?: string } {
+  const qid = String(questionId || "").trim();
+  const hits = (submissions || []).filter((s) => String(s.question_id || "").trim() === qid);
+  if (!hits.length) return { error: `No submission for question_id=${qid}` };
+
+  // Filter submissions with valid scores
+  const validScores = hits.filter(s => s.score !== null && s.score !== undefined);
+  
+  if (validScores.length === 0) {
+    // No valid scores, fall back to final submission
+    const finalSubmissions = hits.filter(s => s.final_submission_per_variant === true);
+    if (finalSubmissions.length > 0) {
+      return { submission: finalSubmissions[0], candidates: hits.length };
+    }
+    // Last resort: return the most recent submission
+    return { submission: hits[hits.length - 1], candidates: hits.length };
+  }
+
+  // Find submission with highest score (if tied, prefer the latest)
+  const best = validScores.reduce((best, current) => 
+    (current.score! >= best.score!) ? current : best
+  );
+  
+  return { submission: best, candidates: hits.length };
 }
 
 function buildOutputHeaderBlock(args: {
@@ -244,6 +279,8 @@ async function handleFetch(parser: ParserConfig, index: number): Promise<void> {
     const strategy = parser.multiSubmissions || "best";
     const picked = strategy === "best"
       ? selectBestSubmission(submissions, parser.questionId)
+      : strategy === "api-best"
+      ? selectApiBestSubmission(submissions, parser.questionId)
       : selectLatestSubmission(submissions, parser.questionId);
 
     if (picked.error || !picked.submission) throw new Error(picked.error || "No submission selected");
