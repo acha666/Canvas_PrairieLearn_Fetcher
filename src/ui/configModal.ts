@@ -152,15 +152,20 @@ export function createConfigModal(handlers: ConfigModalHandlers) {
     const baseUrlInput = h("input", { attrs: { value: config.plBaseUrl, placeholder: "https://us.prairielearn.com" } });
     const apiKeyInput = h("input", { attrs: { value: config.apiKey, placeholder: "00001111-2222-3333-4444-555566667777", type: "password" } });
     const courseInput = h("input", { attrs: { value: config.courseInstanceId, placeholder: "12345" } });
-    const includeHeaderCheckbox = h("input", { attrs: { type: "checkbox" } });
-    includeHeaderCheckbox.checked = Boolean(config.includeOutputHeader);
+    const headerSelect = h("select", {}, [
+      h("option", { attrs: { value: "off" } }, ["Off"]),
+      h("option", { attrs: { value: "top" } }, ["Header at Top"]),
+      h("option", { attrs: { value: "bottom" } }, ["Header at Bottom"])
+    ]);
+    headerSelect.value = config.includeOutputHeader;
 
     const handleSave = () => {
+      const headerVal = String(headerSelect.value || "top");
       const nextConfig: Config = {
         plBaseUrl: String(baseUrlInput.value || "").trim(),
         apiKey: String(apiKeyInput.value || "").trim(),
         courseInstanceId: String(courseInput.value || "").trim(),
-        includeOutputHeader: Boolean(includeHeaderCheckbox.checked),
+        includeOutputHeader: headerVal === "off" || headerVal === "top" || headerVal === "bottom" ? headerVal : "top",
       };
 
       const errors: string[] = [];
@@ -211,7 +216,12 @@ export function createConfigModal(handlers: ConfigModalHandlers) {
     body.appendChild(
       h("div", { className: "plcg-field" }, [
         h("div", {}, ["Include output header"]),
-        h("div", {}, [h("div", { className: "plcg-inline plcg-inline-nowrap" }, [includeHeaderCheckbox, h("span", { className: "plcg-muted" }, ["Write a C/C++ block comment header"])])]),
+        h("div", {}, [
+          h("div", { className: "plcg-inline plcg-inline-nowrap" }, [
+            headerSelect, 
+            h("span", { className: "plcg-muted", style: { marginLeft: "8px" } }, ["Write a C/C++ block comment header"])
+          ])
+        ]),
       ])
     );
 

@@ -288,7 +288,8 @@ async function handleFetch(parser: ParserConfig, index: number): Promise<void> {
     const proc = runProcessor(picked.submission, parser.processor);
     if (proc.error || !proc.text) throw new Error(proc.error || "Processor returned no text");
 
-    const headerBlock = config.includeOutputHeader
+    const headerMode = config.includeOutputHeader;
+    const headerBlock = headerMode !== "off"
       ? buildOutputHeaderBlock({
         student: identity.rec,
         assessmentId: aid,
@@ -299,7 +300,13 @@ async function handleFetch(parser: ParserConfig, index: number): Promise<void> {
       })
       : "";
 
-    await writeTextFile(outputFileHandle, headerBlock + proc.text + "\n");
+    const outputContent = headerMode === "bottom"
+      ? proc.text + "\n" + headerBlock
+      : headerMode === "top"
+      ? headerBlock + proc.text + "\n"
+      : proc.text + "\n";
+
+    await writeTextFile(outputFileHandle, outputContent);
     lastWriteStatus = `Write OK: ${new Date().toLocaleString()}`;
     setStatus(`Done: wrote ${proc.fileName ?? "output"}`, "ok");
   } catch (err) {
