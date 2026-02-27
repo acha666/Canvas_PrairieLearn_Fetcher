@@ -44,7 +44,7 @@ export interface Config {
   plBaseUrl: string;
   apiKey: string;
   courseInstanceId: string;
-  includeOutputHeader: boolean;
+  includeOutputHeader: "off" | "top" | "bottom";
 }
 
 export interface UiState {

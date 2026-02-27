@@ -44,7 +44,7 @@ function defaultConfig(): Config {
     plBaseUrl: "https://us.prairielearn.com",
     apiKey: "",
     courseInstanceId: "",
-    includeOutputHeader: true,
+    includeOutputHeader: "top",
   };
 }
 
@@ -60,7 +60,10 @@ export function loadConfig(): Config {
   const read = <T extends keyof Config>(key: T, fallback: Config[T]): Config[T] => {
     const value = raw[key];
     if (value === undefined || value === null) return fallback;
-    if (typeof fallback === "boolean") return Boolean(value) as Config[T];
+    if (key === "includeOutputHeader") {
+      const val = String(value);
+      return (val === "off" || val === "top" || val === "bottom" ? val : fallback) as Config[T];
+    }
     return String(value) as Config[T];
   };
 
@@ -73,11 +76,12 @@ export function loadConfig(): Config {
 }
 
 export function saveConfig(cfg: Config): void {
+  const val = cfg.includeOutputHeader;
   const minimal: Config = {
     plBaseUrl: String(cfg.plBaseUrl || "").trim(),
     apiKey: String(cfg.apiKey || "").trim(),
     courseInstanceId: String(cfg.courseInstanceId || "").trim(),
-    includeOutputHeader: Boolean(cfg.includeOutputHeader),
+    includeOutputHeader: val === "off" || val === "top" || val === "bottom" ? val : "top",
   };
   localStorage.setItem(LS.CONFIG, JSON.stringify(minimal));
 }
