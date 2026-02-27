@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.0](https://github.com/acha666/Canvas_PrairieLearn_Fetcher/compare/canvas-prairielearn-fetcher-v2.0.0...canvas-prairielearn-fetcher-v2.1.0) (2026-02-27)
+
+
+### Features
+
+* allows header to be added on bottom ([92f94b1](https://github.com/acha666/Canvas_PrairieLearn_Fetcher/commit/92f94b12ce165eb1708e705b0626f3037dd3c9d9))
+* update includeOutputHeader to support "off", "top", and "bottom" options ([803a8c1](https://github.com/acha666/Canvas_PrairieLearn_Fetcher/commit/803a8c15ab22c80f482ed8c2b56aa47a43e22dca))
+
 ## [2.0.0](https://github.com/acha666/Canvas_PrairieLearn_Fetcher/compare/canvas-prairielearn-fetcher-v1.3.0...canvas-prairielearn-fetcher-v2.0.0) (2026-01-23)
 
 
