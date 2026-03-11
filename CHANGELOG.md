@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.0](https://github.com/acha666/Canvas_PrairieLearn_Fetcher/compare/canvas-prairielearn-fetcher-v2.1.0...canvas-prairielearn-fetcher-v2.2.0) (2026-03-11)
+
+
+### Features
+
+* enhance question ID input to support multiple IDs in config modal ([62d4766](https://github.com/acha666/Canvas_PrairieLearn_Fetcher/commit/62d476628a6bc5571c18911bafc59068613cb713))
+* enhance question ID input to support multiple IDs in config modal ([c650949](https://github.com/acha666/Canvas_PrairieLearn_Fetcher/commit/c650949ada5c1b8f8e2196a7f0b99950c154852e))
+
 ## [2.1.0](https://github.com/acha666/Canvas_PrairieLearn_Fetcher/compare/canvas-prairielearn-fetcher-v2.0.0...canvas-prairielearn-fetcher-v2.1.0) (2026-02-27)
 
 
