@@ -69,7 +69,7 @@ export function createConfigModal(handlers: ConfigModalHandlers) {
     const tbody = h("tbody");
 
     parsers.forEach((p, idx) => {
-      const qInput = h("input", { attrs: { value: p.questionId, placeholder: "1234567" } });
+      const qInput = h("input", { attrs: { value: p.questionId, placeholder: "1234567|2345678" } });
       const aInput = h("input", { attrs: { value: p.assessmentId, placeholder: "1234567" } });
       const multiSelect = h("select", {}, [
         h("option", { attrs: { value: "best" } }, ["best (local score)"]),
