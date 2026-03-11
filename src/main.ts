@@ -84,10 +84,55 @@ function resolveIdentity(): IdentityState {
   return { ok: true, errors: [], uiName, rec: match, userUin, currentStudentId: sid };
 }
 
+function parseQuestionIds(rawQuestionId: string): string[] {
+  const seen = new Set<string>();
+  const ids: string[] = [];
+  String(rawQuestionId || "")
+    .split("|")
+    .map((id) => id.trim())
+    .forEach((id) => {
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      ids.push(id);
+    });
+  return ids;
+}
+
+function resolveSubmissionCandidates(
+  submissions: PrairieLearnSubmission[],
+  questionId: string
+): { hits?: PrairieLearnSubmission[]; error?: string } {
+  const questionIds = parseQuestionIds(questionId);
+  if (!questionIds.length) return { error: "question_id is empty" };
+
+  const groups = questionIds.map((qid) => ({
+    qid,
+    hits: (submissions || []).filter((s) => String(s.question_id || "").trim() === qid),
+  }));
+  const matched = groups.filter((g) => g.hits.length > 0);
+
+  if (!matched.length) {
+    return {
+      error:
+        questionIds.length === 1
+          ? `No submission for question_id=${questionIds[0]}`
+          : `No submission for question_id in [${questionIds.join(" | ")}]`,
+    };
+  }
+
+  if (matched.length > 1) {
+    return {
+      error: `Multiple question_id groups have submissions: ${matched.map((g) => `${g.qid}(${g.hits.length})`).join(", ")}`,
+    };
+  }
+
+  return { hits: matched[0].hits };
+}
+
 function selectLatestSubmission(submissions: PrairieLearnSubmission[], questionId: string): { submission?: PrairieLearnSubmission; candidates?: number; error?: string } {
-  const qid = String(questionId || "").trim();
-  const hits = (submissions || []).filter((s) => String(s.question_id || "").trim() === qid);
-  if (!hits.length) return { error: `No submission for question_id=${qid}` };
+  const resolved = resolveSubmissionCandidates(submissions, questionId);
+  if (resolved.error || !resolved.hits) return { error: resolved.error || "No submission selected" };
+  const hits = resolved.hits;
 
   // Look for final_submission_per_variant === true
   const finalSubmissions = hits.filter(s => s.final_submission_per_variant === true);
@@ -110,9 +155,9 @@ function selectLatestSubmission(submissions: PrairieLearnSubmission[], questionI
  * where NULL scores are incorrectly prioritized. Use 'best' instead for local calculation.
  */
 function selectApiBestSubmission(submissions: PrairieLearnSubmission[], questionId: string): { submission?: PrairieLearnSubmission; candidates?: number; error?: string } {
-  const qid = String(questionId || "").trim();
-  const hits = (submissions || []).filter((s) => String(s.question_id || "").trim() === qid);
-  if (!hits.length) return { error: `No submission for question_id=${qid}` };
+  const resolved = resolveSubmissionCandidates(submissions, questionId);
+  if (resolved.error || !resolved.hits) return { error: resolved.error || "No submission selected" };
+  const hits = resolved.hits;
 
   // Look for best_submission_per_variant === true
   const bestSubmissions = hits.filter(s => s.best_submission_per_variant === true);
@@ -134,9 +179,9 @@ function selectApiBestSubmission(submissions: PrairieLearnSubmission[], question
  * This is a workaround for PL API bug where NULL scores are prioritized
  */
 function selectBestSubmission(submissions: PrairieLearnSubmission[], questionId: string): { submission?: PrairieLearnSubmission; candidates?: number; error?: string } {
-  const qid = String(questionId || "").trim();
-  const hits = (submissions || []).filter((s) => String(s.question_id || "").trim() === qid);
-  if (!hits.length) return { error: `No submission for question_id=${qid}` };
+  const resolved = resolveSubmissionCandidates(submissions, questionId);
+  if (resolved.error || !resolved.hits) return { error: resolved.error || "No submission selected" };
+  const hits = resolved.hits;
 
   // Filter submissions with valid scores
   const validScores = hits.filter(s => s.score !== null && s.score !== undefined);
